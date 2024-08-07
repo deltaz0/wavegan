@@ -1,5 +1,11 @@
-import tensorflow as tf
-
+import tensorflow.compat.v1 as tf
+#import tensorflow as tf
+tf.compat.v1.disable_eager_execution()
+tf.disable_v2_behavior()
+gpus = tf.config.list_physical_devices('GPU')
+tf.config.set_visible_devices(gpus[0], 'GPU')
+logical_gpus = tf.config.list_logical_devices('GPU')
+print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
 
 def conv1d_transpose(
     inputs,

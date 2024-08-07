@@ -1,17 +1,10 @@
 from scipy.io.wavfile import read as wavread
 import numpy as np
 
-import tensorflow.compat.v1 as tf
-#import tensorflow as tf
-tf.compat.v1.disable_eager_execution()
-tf.disable_v2_behavior()
+import tensorflow as tf
 
 import sys
 
-gpus = tf.config.list_physical_devices('GPU')
-tf.config.set_visible_devices(gpus[0], 'GPU')
-logical_gpus = tf.config.list_logical_devices('GPU')
-print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPU")
 
 def decode_audio(fp, fs=None, num_channels=1, normalize=False, fast_wav=False):
   """Decodes audio file paths into 32-bit floating point vectors.
@@ -134,10 +127,11 @@ def decode_extract_and_batch(
       normalize=decode_normalize,
       fast_wav=decode_fast_wav)
 
-    audio = tf.numpy_function(
+    audio = tf.compat.v1.py_func(
         _decode_audio_closure,
         [fp],
-        tf.float32)
+        tf.float32,
+        stateful=False)
     audio.set_shape([None, 1, decode_num_channels])
 
     return audio
@@ -158,11 +152,11 @@ def decode_extract_and_batch(
 
     # Randomize starting phase:
     if slice_randomize_offset:
-      start = tf.random_uniform([], maxval=slice_len, dtype=tf.int32)
+      start = tf.random.uniform([], maxval=slice_len, dtype=tf.int32)
       audio = audio[start:]
 
     # Extract sliceuences
-    audio_slices = tf.signal.frame(
+    audio_slices = tf.contrib.signal.frame(
         audio,
         slice_len,
         slice_hop,

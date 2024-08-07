@@ -5,3 +5,7 @@
 *.tar.gz
 train
 web/ckpts
+trainGuit/
+trainNew/
+trainOld/
+trainSnare/
